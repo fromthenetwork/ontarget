@@ -1,3 +1,4 @@
+#backend/app/models.py
 import uuid
 
 from pydantic import EmailStr
@@ -44,6 +45,7 @@ class User(UserBase, table=True):
     id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
     hashed_password: str
     items: list["Item"] = Relationship(back_populates="owner", cascade_delete=True)
+    campaigns: list["Campaign"] = Relationship(back_populates="owner", cascade_delete=True)
 
 
 # Properties to return via API, id is always required
@@ -89,6 +91,44 @@ class ItemPublic(ItemBase):
 
 class ItemsPublic(SQLModel):
     data: list[ItemPublic]
+    count: int
+
+
+# Shared properties for Campaign
+class CampaignBase(SQLModel):
+    name: str = Field(min_length=1, max_length=255)
+    description: str | None = Field(default=None, max_length=1000)
+    status: str = Field(default="draft", max_length=50)
+
+
+# Properties to receive on campaign creation
+class CampaignCreate(CampaignBase):
+    pass
+
+
+# Properties to receive on campaign update
+class CampaignUpdate(CampaignBase):
+    name: str | None = Field(default=None, min_length=1, max_length=255)  # type: ignore
+    status: str | None = Field(default=None, max_length=50)
+
+
+# Database model, database table inferred from class name
+class Campaign(CampaignBase, table=True):
+    id: uuid.UUID = Field(default_factory=uuid.uuid4, primary_key=True)
+    owner_id: uuid.UUID = Field(
+        foreign_key="user.id", nullable=False, ondelete="CASCADE"
+    )
+    owner: User | None = Relationship(back_populates="campaigns")
+
+
+# Properties to return via API, id is always required
+class CampaignPublic(CampaignBase):
+    id: uuid.UUID
+    owner_id: uuid.UUID
+
+
+class CampaignsPublic(SQLModel):
+    data: list[CampaignPublic]
     count: int
 
 
