@@ -1,3 +1,4 @@
+//frontend/src/routes/signup.tsx
 import { Container, Flex, Image, Input, Text } from "@chakra-ui/react"
 import {
   Link as RouterLink,
@@ -14,7 +15,7 @@ import { InputGroup } from "@/components/ui/input-group"
 import { PasswordInput } from "@/components/ui/password-input"
 import useAuth, { isLoggedIn } from "@/hooks/useAuth"
 import { confirmPasswordRules, emailPattern, passwordRules } from "@/utils"
-import Logo from "/assets/images/fastapi-logo.svg"
+import Logo from "/assets/images/ontarget-logo.svg"
 
 export const Route = createFileRoute("/signup")({
   component: SignUp,

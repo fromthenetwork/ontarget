@@ -1,10 +1,11 @@
+#backend/app/crud.py
 import uuid
 from typing import Any
 
 from sqlmodel import Session, select
 
 from app.core.security import get_password_hash, verify_password
-from app.models import Item, ItemCreate, User, UserCreate, UserUpdate
+from app.models import Item, ItemCreate, User, UserCreate, UserUpdate, Campaign, CampaignCreate, CampaignUpdate
 
 
 def create_user(*, session: Session, user_create: UserCreate) -> User:
@@ -52,3 +53,31 @@ def create_item(*, session: Session, item_in: ItemCreate, owner_id: uuid.UUID) -
     session.commit()
     session.refresh(db_item)
     return db_item
+
+
+def create_campaign(*, session: Session, campaign_in: CampaignCreate, owner_id: uuid.UUID) -> Campaign:
+    db_campaign = Campaign.model_validate(campaign_in, update={"owner_id": owner_id})
+    session.add(db_campaign)
+    session.commit()
+    session.refresh(db_campaign)
+    return db_campaign
+
+
+def get_campaign_by_id(*, session: Session, campaign_id: uuid.UUID) -> Campaign | None:
+    return session.get(Campaign, campaign_id)
+
+
+def update_campaign(
+        *, session: Session, db_campaign: Campaign, campaign_in: CampaignUpdate
+) -> Campaign:
+    campaign_data = campaign_in.model_dump(exclude_unset=True)
+    db_campaign.sqlmodel_update(campaign_data)
+    session.add(db_campaign)
+    session.commit()
+    session.refresh(db_campaign)
+    return db_campaign
+
+
+def delete_campaign(*, session: Session, db_campaign: Campaign) -> None:
+    session.delete(db_campaign)
+    session.commit()
